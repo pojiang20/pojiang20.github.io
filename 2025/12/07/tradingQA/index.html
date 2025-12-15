@@ -6,15 +6,15 @@
   
   <title>tradingQA | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="低利率贷款投资现在我和你讨论一个严肃的问题，我要不要贷款投资。虽然很多人都说”不要贷款投资“，并且是任何情况下，但是我还是想和你讨论一下其中的风险和可行性。 下面我会从贷款、收入和投资收益三方面来说明我的情况。贷款： 我打算贷款20万人民币，当前利率是3.05%。按照24个月按照等额本息的方式还款每月需要还8600，总利息是6416。并且可以提前还款收入：现在每月可以到手x万人民币，我预计会继续工">
+  <meta name="description" content="回落卖出 (Trailing Stop) 触发机制复盘1. 核心现象  设定： 初始市价约 222，设置回落 15 卖出。 预期： 跌到 207 卖出 (222 - 15)。 实际： 在 216.17 触发卖出（比预期高了约 9 美元）。  2. 触发逻辑  机制： “回落卖出”的止损线是动态的。 股价上涨时：止损线会跟随上移（锁定利润）。 股价下跌时：止损线保持不变（作为防守）。   公式： 触">
 <meta property="og:type" content="article">
 <meta property="og:title" content="tradingQA">
 <meta property="og:url" content="http://example.com/2025/12/07/tradingQA/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="低利率贷款投资现在我和你讨论一个严肃的问题，我要不要贷款投资。虽然很多人都说”不要贷款投资“，并且是任何情况下，但是我还是想和你讨论一下其中的风险和可行性。 下面我会从贷款、收入和投资收益三方面来说明我的情况。贷款： 我打算贷款20万人民币，当前利率是3.05%。按照24个月按照等额本息的方式还款每月需要还8600，总利息是6416。并且可以提前还款收入：现在每月可以到手x万人民币，我预计会继续工">
+<meta property="og:description" content="回落卖出 (Trailing Stop) 触发机制复盘1. 核心现象  设定： 初始市价约 222，设置回落 15 卖出。 预期： 跌到 207 卖出 (222 - 15)。 实际： 在 216.17 触发卖出（比预期高了约 9 美元）。  2. 触发逻辑  机制： “回落卖出”的止损线是动态的。 股价上涨时：止损线会跟随上移（锁定利润）。 股价下跌时：止损线保持不变（作为防守）。   公式： 触">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-12-07T08:54:56.000Z">
-<meta property="article:modified_time" content="2025-12-07T14:25:33.567Z">
+<meta property="article:modified_time" content="2025-12-15T03:29:22.073Z">
 <meta property="article:author" content="Zen">
 <meta name="twitter:card" content="summary">
   
@@ -93,7 +93,106 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="低利率贷款投资"><a href="#低利率贷款投资" class="headerlink" title="低利率贷款投资"></a>低利率贷款投资</h1><p>现在我和你讨论一个严肃的问题，我要不要贷款投资。虽然很多人都说”不要贷款投资“，并且是任何情况下，但是我还是想和你讨论一下其中的风险和可行性。</p>
+        <h1 id="回落卖出-Trailing-Stop-触发机制复盘"><a href="#回落卖出-Trailing-Stop-触发机制复盘" class="headerlink" title="回落卖出 (Trailing Stop) 触发机制复盘"></a>回落卖出 (Trailing Stop) 触发机制复盘</h1><p><strong>1. 核心现象</strong></p>
+<ul>
+<li><strong>设定：</strong> 初始市价约 222，设置回落 15 卖出。</li>
+<li><strong>预期：</strong> 跌到 207 卖出 (222 - 15)。</li>
+<li><strong>实际：</strong> 在 <strong>216.17</strong> 触发卖出（比预期高了约 9 美元）。</li>
+</ul>
+<p><strong>2. 触发逻辑</strong></p>
+<ul>
+<li><strong>机制：</strong> “回落卖出”的止损线是<strong>动态</strong>的。<ul>
+<li>股价<strong>上涨</strong>时：止损线会跟随上移（锁定利润）。</li>
+<li>股价<strong>下跌</strong>时：止损线保持不变（作为防守）。</li>
+</ul>
+</li>
+<li><strong>公式：</strong> <code>触发卖出价 = 历史最高价 (High Water Mark) - 设定的回落额</code></li>
+</ul>
+<p><strong>3. 案情还原</strong></p>
+<ul>
+<li><strong>推导：</strong> 既然成交在 216.17，且回落额为 15，说明该股票在持仓期间（盘中或盘后）一定经历过上涨。</li>
+<li><strong>最高点估算：</strong> $216.17 \text{ (成交价)} + 15 \text{ (回落额)} \approx 231.17$。</li>
+<li><strong>结论：</strong> 股价先从 222 涨到了 231 以上，带动止损线从 207 上移到了 216，随后股价回落触发卖出。</li>
+</ul>
+<p><strong>4. 关键知识点</strong></p>
+<ul>
+<li><strong>优势：</strong> 相比普通止损单，Trailing Stop 能在股价上涨时自动提高止盈位，<strong>让利润奔跑，同时限制回撤</strong>。</li>
+<li><strong>注意：</strong> 触发时间为 16:05（美股盘后），盘后流动性差可能导致价格剧烈波动或跳空，实际成交价可能与理论触发价有细微偏差（Slippage）。</li>
+</ul>
+<hr>
+<p><strong>一句话总结：</strong><br>实际卖出价高于预期，是因为股价先涨后跌，策略自动帮你**“提高了止损线”**，锁定了更多收益。</p>
+<h1 id="QQQ-长期期权-LEAPS-抄底策略笔记"><a href="#QQQ-长期期权-LEAPS-抄底策略笔记" class="headerlink" title="QQQ 长期期权 (LEAPS) 抄底策略笔记"></a>QQQ 长期期权 (LEAPS) 抄底策略笔记</h1><h3 id="1-策略核心操作手册"><a href="#1-策略核心操作手册" class="headerlink" title="1. 策略核心操作手册"></a>1. 策略核心操作手册</h3><ul>
+<li><strong>标的资产</strong>：$QQQ (纳斯达克100指数 ETF)</li>
+<li><strong>入场信号 (Trigger)</strong>：当 QQQ 单日<strong>跌幅超过 1%</strong> 时。</li>
+<li><strong>买入标的 (Instrument)</strong>：<ul>
+<li><strong>类型</strong>：Call Option (看涨期权)</li>
+<li><strong>到期日 (Expiration)</strong>：<strong>2年</strong> 后到期 (LEAPS)</li>
+<li><strong>行权参数 (Strike)</strong>：选择 <strong>Delta 约为 0.6</strong> 的期权 (这通常是价内期权 ITM)。</li>
+</ul>
+</li>
+<li><strong>离场策略 (Exit)</strong>：<ul>
+<li>设置 <strong>50% 止盈单</strong> (GTC Limit Order)。</li>
+<li>一旦期权价格上涨 50%，系统自动卖出锁定利润。</li>
+</ul>
+</li>
+<li><strong>理论持仓时间</strong>：平均约 3 个月（依靠短期反弹触达止盈点）。</li>
+</ul>
+<hr>
+<h3 id="2-赚钱的核心逻辑-Why-it-Works"><a href="#2-赚钱的核心逻辑-Why-it-Works" class="headerlink" title="2. 赚钱的核心逻辑 (Why it Works)"></a>2. 赚钱的核心逻辑 (Why it Works)</h3><p>该策略利用了<strong>杠杆</strong>和<strong>均值回归</strong>原理：</p>
+<ol>
+<li><strong>以小博大 (Leverage)</strong>：<ul>
+<li>Delta 0.6 意味着正股涨 1 元，期权涨 0.6 元。</li>
+<li>但由于期权成本远低于正股（通常仅为股价的 10%-15%），正股只需反弹 <strong>5%-8%</strong>，期权价格就能因杠杆效应上涨 <strong>30%-50%</strong>。</li>
+</ul>
+</li>
+<li><strong>时间换空间 (Safety)</strong>：<ul>
+<li>购买 2 年期的 LEAPS 是为了防止短期被套。即使买入后市场横盘或继续下跌 3-6 个月，期权也不会像短期期权那样快速归零，你有足够的时间等待科技股反弹。</li>
+</ul>
+</li>
+<li><strong>均值回归 (Mean Reversion)</strong>：<ul>
+<li>纳斯达克长期趋势向上，利用“暴跌 1%”作为信号，意味着你在恐慌中以相对较低的成本（权利金）入场。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="3-风险揭示-Risk-Warning"><a href="#3-风险揭示-Risk-Warning" class="headerlink" title="3. 风险揭示 (Risk Warning)"></a>3. 风险揭示 (Risk Warning)</h3><p><strong>请务必理解：你不会“爆仓”（欠债），但可能会“归零”（亏光）。</strong></p>
+<ul>
+<li><strong>关于爆仓</strong>：作为期权买方 (Buy Call)，你最大的亏损仅限于你投入的权利金。你不会欠券商钱，不会遭遇强制平仓 (Margin Call)。</li>
+<li><strong>关于归零</strong>：如果市场进入长期熊市（如跌幅超过 20%-30% 并持续一年），你的 LEAPS Call 会变成深度虚值 (Deep OTM)，价值可能无限接近于 <strong>$0</strong>。</li>
+<li><strong>波动率陷阱 (IV Crush)</strong>：在暴跌时买入，通常隐含波动率 (IV) 较高，期权较贵。如果随后市场缓慢上涨但恐慌消退，期权价格可能不涨反跌。</li>
+</ul>
+<hr>
+<h3 id="4-资金管理铁律-关键！"><a href="#4-资金管理铁律-关键！" class="headerlink" title="4. 资金管理铁律 (关键！)"></a>4. 资金管理铁律 (关键！)</h3><p>博主提到的“胜率 99%”是基于历史长牛数据的，<strong>切勿迷信</strong>。为了生存，必须遵守：</p>
+<ol>
+<li><strong>绝不 All-in (梭哈)</strong>：<ul>
+<li>永远假设明天还会跌。</li>
+</ul>
+</li>
+<li><strong>分批建仓</strong>：<ul>
+<li>将总资金切分成若干份（例如 10-20 份）。</li>
+<li>每次触发“暴跌 1%”信号时，只投入一份资金（例如总仓位的 5%）。</li>
+</ul>
+</li>
+<li><strong>心理建设</strong>：<ul>
+<li>做好持仓可能浮亏 50% 以上的心理准备。</li>
+<li>这笔钱必须是“闲钱”，输光不影响生活。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="5-简单算账示例"><a href="#5-简单算账示例" class="headerlink" title="5. 简单算账示例"></a>5. 简单算账示例</h3><p>假设 QQQ 当前价格 <strong>$400</strong>。</p>
+<ul>
+<li><strong>买正股</strong>：需 $40,000。涨 5% (至 $420) -&gt; 赚 <strong>$2,000</strong> (收益率 5%)。</li>
+<li><strong>买策略期权</strong>：成本约 <strong>$5,000</strong> (Delta 0.6)。<ul>
+<li>当 QQQ 涨 5% (+$20) -&gt; 期权约涨 $12 ($20 × 0.6)。</li>
+<li>总盈利：$1,200。</li>
+<li><strong>收益率：$1,200 &#x2F; $5,000 &#x3D; 24%</strong>。</li>
+<li><em>注：仅需正股小幅反弹，期权收益率即可成倍放大。</em></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="Question-低利率贷款投资"><a href="#Question-低利率贷款投资" class="headerlink" title="Question 低利率贷款投资"></a>Question 低利率贷款投资</h1><p>现在我和你讨论一个严肃的问题，我要不要贷款投资。虽然很多人都说”不要贷款投资“，并且是任何情况下，但是我还是想和你讨论一下其中的风险和可行性。</p>
 <p>下面我会从贷款、收入和投资收益三方面来说明我的情况。<br>贷款： 我打算贷款20万人民币，当前利率是3.05%。按照24个月按照等额本息的方式还款每月需要还8600，总利息是6416。并且可以提前还款<br>收入：现在每月可以到手x万人民币，我预计会继续工作一年以上，并且大概率不会被裁员而失业。<br>投资收益：我要把所有资金都投入到纳斯达克指数这种相对稳定的股票上，收益约ytd 10%。</p>
 <p>请根据情况，帮我考虑一下我是否应该贷款，以及其中可能有什么我没有考虑到的风险？仔细分析如果我这样做，我可以获得多少收益？如果出现意外，我可能会面临什么风险？</p>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>纳斯达克指数波动较大，为了3.5w的收益负债20w不值得。可以把低利率贷款看做储备资金，等有黄金坑的时候购入。</p>
